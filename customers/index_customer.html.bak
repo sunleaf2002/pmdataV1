@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="keywords" content="jquery,ui,easy,easyui,web">
+	<meta name="description" content="easyui help you build your web page easily!">
+	<title>客户信息</title>
+
+	<link rel="stylesheet" type="text/css" href="http://www.jeasyui.net/Public/js/easyui/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="http://www.jeasyui.net/Public/js/easyui/themes/icon.css">
+	<link rel="stylesheet" type="text/css" href="http://www.jeasyui.net/Public/js/easyui/demo/demo.css">
+	<!--
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.5.1/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.5.1/themes/default/icon.css">
+			<link rel="stylesheet" type="text/css" href="../jquery-easyui-1.5.1/demo/demo.css">
+	-->
+	
+	<style type="text/css">
+		#fm{
+			margin:0;
+			padding:10px 30px;
+		}
+		.ftitle{
+			font-size:14px;
+			font-weight:bold;
+			color:#666;
+			padding:5px 0;
+			margin-bottom:10px;
+			border-bottom:1px solid #ccc;
+		}
+		.fitem{
+			margin-bottom:5px;
+		}
+		.fitem label{
+			display:inline-block;
+			width:80px;
+		}
+	</style>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
+	<script type="text/javascript" src="http://www.jeasyui.net/Public/js/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript">
+		var url;
+		function newUser(){
+			$('#dlg').dialog('open').dialog('setTitle','新增客户');
+			$('#fm').form('clear');
+			url = 'save_customer.php';
+		}
+		function editUser(){
+			var row = $('#dg').datagrid('getSelected');
+			if (row){
+				$('#dlg').dialog('open').dialog('setTitle','编辑客户');
+				$('#fm').form('load',row);
+				url = 'update_customers.php?id='+row.id;
+			}
+		}
+		function saveUser(){
+			$('#fm').form('submit',{
+				url: url,
+				onSubmit: function(){
+					return $(this).form('validate');
+				},
+				success: function(result){
+					var result = eval('('+result+')');
+					if (result.success){
+						$('#dlg').dialog('close');		// close the dialog
+						$('#dg').datagrid('reload');	// reload the user data
+					} else {
+						$.messager.show({
+							title: 'Error',
+							msg: result.msg
+						});
+					}
+				}
+			});
+		}
+		function removeUser(){
+			var row = $('#dg').datagrid('getSelected');
+			if (row){
+				$.messager.confirm('Confirm','Are you sure you want to remove this user?',function(r){
+					if (r){
+						$.post('remove_customers.php',{id:row.id},function(result){
+							if (result.success){
+								$('#dg').datagrid('reload');	// reload the user data
+							} else {
+								$.messager.show({	// show error message
+									title: 'Error',
+									msg: result.msg
+								});
+							}
+						},'json');
+					}
+				});
+			}
+		}
+	</script>
+</head>
+<body>
+	<h2>客户基本信息维护</h2>
+	<div class="demo-info" style="margin-bottom:10px">
+		<div class="demo-tip icon-tip">&nbsp;</div>
+		<div></div>
+	</div>
+	
+	<table id="dg" title="客户" class="easyui-datagrid" style="width:700px;height:250px"
+			url="get_customers.php"
+			toolbar="#toolbar" pagination="true"
+			rownumbers="true" fitColumns="true" singleSelect="true">
+		<thead>
+			<tr>
+				<th field="customer_id" width="50">客户号</th>
+				<th field="customer_name" width="100">客户名称</th>
+				<th field="customer_type" width="50">客户类型</th>
+				<th field="customer_level" width="50">客户级别</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="toolbar">
+		<a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">新增</a>
+		<a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">编辑</a>
+		<a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="removeUser()">删除</a>
+	</div>
+	
+	<div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
+			closed="true" buttons="#dlg-buttons">
+		<div class="ftitle">客户信息</div>
+		<form id="fm" method="post" novalidate>
+			<div class="fitem">
+				<label>客户编码:</label>
+				<input name="customer_id" class="easyui-validatebox" required="true">
+			</div>
+			<div class="fitem">
+				<label>客户名称:</label>
+				<input name="customer_name" class="easyui-validatebox" required="true">
+			</div>
+			<div class="fitem">
+				<label>客户类型:</label>
+				<!--<input name="customer_type">-->
+		 	<select id="customer_type" class="easyui-combobox" name="customer_type" style="width:155px;">   
+				    <option value="0">民企</option>   
+				    <option value="1">军方</option>   				   
+			 </select>  
+
+			</div>
+			<div class="fitem">
+				<label>客户级别:</label>
+			<!--	<input name="customer_level" > -->
+				<select id="customer_level" class="easyui-combobox" name="customer_level" style="width:155px;">   
+				    <option value="1">钻石级</option>   
+				    <option value="2">白金级</option>   
+				    <option value="3">黄金级</option>   
+				    <option value="4">白银级</option>   
+				    <option value="5">合金级</option>   
+			  </select>  
+
+			</div>
+		</form>
+	</div>
+	<div id="dlg-buttons">
+		<a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveUser()">Save</a>
+		<a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">Cancel</a>
+	</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<?php
+
+$conn = @mysql_connect('192.168.120.200','root','root99');
+if (!$conn) {
+	die('Could not connect: ' . mysql_error());
+}
+mysql_select_db('pmdataweb', $conn);
+
+
+?>
